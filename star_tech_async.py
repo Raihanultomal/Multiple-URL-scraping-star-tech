@@ -1,20 +1,11 @@
-#It's not working
-
-from aiohttp import ClientSession
-import asyncio
-import pathlib
 from numpy import append
-# import requests
+import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-
-# async def main():
-#     url = ""
-#     async with ClientSession() as session:
-#         async with session.get(url) as response:
-
+import asyncio
 
 pg_numbers = []
+each_page_title = []
 product_list = []
 global count_url
 
@@ -38,54 +29,57 @@ global count_url
 #     return page
 
 
+
+# collecting soup and extract according to the URL
+
 async def extract(soup):
     # divs = soup.find_all('div',class_ = "p-item-img")
-    divs = await soup.find_all('div', class_ = "p-item")
+    divs = soup.find_all('div', class_ = "p-item")
 
     for links in divs:
 
         collect_links = links.a['href']
         # print(collect_links)
-        async with ClientSession() as request:
-            details_url = await collect_links
-            details_r = await request.get(details_url)
-            details_soup = await BeautifulSoup(details_r.content, 'lxml')
-            title = await details_soup.find('h1', class_ = "product-name").text
-            # print(title)
+
+        details_url = collect_links
+        details_r = requests.get(details_url)
+        details_soup = BeautifulSoup(details_r.content, 'lxml')
+        title = details_soup.find('h1', class_ = "product-name").text
+        # print(title)
 
                 
         try:
-            price = await details_soup.find('td', class_ = "product-info-data product-price").text.replace('৳', '')
+            price = details_soup.find('td', class_ = "product-info-data product-price").text.replace('৳', '')
         except:
             price = ""
         # print(price)
 
         try:
-            regular_price = await details_soup.find('td', class_ = "product-info-data product-regular-price").text.replace('৳', '')
+            regular_price = details_soup.find('td', class_ = "product-info-data product-regular-price").text.replace('৳', '')
         except:
             regular_price = ""
         # print(regular_price)
 
         try:
-            status = await details_soup.find('td', class_ = "product-info-data product-status").text
+            status = details_soup.find('td', class_ = "product-info-data product-status").text
         except:
             status = ""
         # print(status)
 
         try:
-            product_code = await details_soup.find('td', class_ = "product-info-data product-code").text
+            product_code = details_soup.find('td', class_ = "product-info-data product-code").text
         except:
             product_code = ""
         # print(product_code)
 
         try:
-            product_brand = await details_soup.find('td', class_ = "product-info-data product-brand").text
+            product_brand = details_soup.find('td', class_ = "product-info-data product-brand").text
         except:
             product_brand = ""
         # print(product_brand)
 
         try:
-            key_feature = await details_soup.find('div', class_ = "short-description").ul.text.replace('View More Info','')
+            key_feature = details_soup.find('div', class_ = "short-description").ul.text.replace('View More Info','')
         except:
             key_feature = ""    
 
@@ -97,7 +91,7 @@ async def extract(soup):
         # print("\n")
 
         try:
-            description = await details_soup.find('div', class_ = "full-description").text
+            description = details_soup.find('div', class_ = "full-description").text
         except:
             description = ""
         # print(description)
@@ -123,56 +117,56 @@ async def extract(soup):
 
 async def url(page,count_url):
     url_list = [
-    f"https://www.startech.com.bd/desktops?page={page}",
-    f"https://www.startech.com.bd/laptop-notebook?page={page}",
-    f"https://www.startech.com.bd/laptop-notebook/laptop-accessories?page={page}",
-    f"https://www.startech.com.bd/component/graphics-card?page={page}",
-    f"https://www.startech.com.bd/component/ram?page={page}",
-    f"https://www.startech.com.bd/component/SSD-Hard-Disk?page={page}",
-    f"https://www.startech.com.bd/component/casing?page={page}",
-    f"https://www.startech.com.bd/monitor?page={page}",
-    f"https://www.startech.com.bd/ups-ips?page={page}",
-    f"https://www.startech.com.bd/office-equipment/printer?page={page}",
-    f"https://www.startech.com.bd/office-equipment/toner?page={page}",
-    f"https://www.startech.com.bd/office-equipment?page={page}",
-    f"https://www.startech.com.bd/camera?page={page}",
-    f"https://www.startech.com.bd/Security-Camera?page={page}",
-    f"https://www.startech.com.bd/networking/router?page={page}",
-    f"https://www.startech.com.bd/networking/network-switch?page={page}",
-    f"https://www.startech.com.bd/accessories/keyboards?page={page}",
-    f"https://www.startech.com.bd/accessories/mouse?page={page}",
-    f"https://www.startech.com.bd/accessories/headphone?page={page}",
-    f"https://www.startech.com.bd/accessories/speaker-and-home-theater?page={page}",
-    f"https://www.startech.com.bd/accessories/bluetooth-speaker?page={page}",
+        f"https://www.startech.com.bd/special-pc?page={page}",
+        f"https://www.startech.com.bd/desktops/star-pc?page={page}",
+
+        # f"https://www.startech.com.bd/desktops?page={page}",
+        # f"https://www.startech.com.bd/component/ram?page={page}",
+        # f"https://www.startech.com.bd/component/graphics-card?page={page}",
+        # f"https://www.startech.com.bd/laptop-notebook?page={page}",
+        # f"https://www.startech.com.bd/laptop-notebook/laptop-accessories?page={page}",
+        # f"https://www.startech.com.bd/component/SSD-Hard-Disk?page={page}",
+        # f"https://www.startech.com.bd/component/casing?page={page}",
+        # f"https://www.startech.com.bd/monitor?page={page}",
+        # f"https://www.startech.com.bd/ups-ips?page={page}",
+        # f"https://www.startech.com.bd/office-equipment/printer?page={page}",
+        # f"https://www.startech.com.bd/office-equipment/toner?page={page}",
+        # f"https://www.startech.com.bd/office-equipment?page={page}",
+        # f"https://www.startech.com.bd/camera?page={page}",
+        # f"https://www.startech.com.bd/Security-Camera?page={page}",
+        # f"https://www.startech.com.bd/networking/router?page={page}",
+        # f"https://www.startech.com.bd/networking/network-switch?page={page}",
+        # f"https://www.startech.com.bd/accessories/keyboards?page={page}",
+        # f"https://www.startech.com.bd/accessories/mouse?page={page}",
+        # f"https://www.startech.com.bd/accessories/headphone?page={page}",
+        # f"https://www.startech.com.bd/accessories/speaker-and-home-theater?page={page}",
+        # f"https://www.startech.com.bd/accessories/bluetooth-speaker?page={page}",
 
     ]
     # print(len(url))
     flss = count_url
     if flss == -1:
         for i in url_list:
-            async with ClientSession() as request:
-                # async with session.get(url) as response:
-                r = await request.get(i)
-                soup = await BeautifulSoup(r.content, 'lxml')
-                page_number = soup.find('div', class_ = "col-md-6 rs-none text-right").p.text.split("(")[-1].replace(' Pages)','')
-                # print(page_number)
-                pg_numbers.append(int(page_number))
+            r = requests.get(i)
+            soup = BeautifulSoup(r.content, 'lxml')
+            page_number = soup.find('div', class_ = "col-md-6 rs-none text-right").p.text.split("(")[-1].replace(' Pages)','')
+            page_title = soup.find('h6', class_ = "page-heading m-hide").text
+            # print(page_number)
+            pg_numbers.append(int(page_number))
+            each_page_title.append(page_title)
         
     else:
         new_url = url_list[count_url]
         print(new_url)
-        async with ClientSession() as request:
-            r = await request.get(new_url)
-            soup = await BeautifulSoup(r.content, 'lxml')
-            return soup
+        r = await requests.get(new_url)
+        soup = await BeautifulSoup(r.content, 'lxml')
+        return await soup
 
 
 
 async def main():
-
-    async with ClientSession() as session:
-        async with session.get(url) as response:
-            html_body = await response.read()
+    
+    # fls = -1
     count_url = -1
     await url(1,count_url)
     print(pg_numbers)
@@ -181,17 +175,21 @@ async def main():
     # for page_number in pg_numbers:
     #     print(type(page_number))
     count_url = 0
+    page_number_of_title = 0
     # fls = 1
+
     for page_number in pg_numbers:
-        for j in range(1,page_number):
+        # print(f"page title {each_page_title[page_number_of_title]}")
+        title = each_page_title[page_number_of_title]
+        page_number_of_title = page_number_of_title + 1
+        async for j in range(1,page_number+1):
             print(f"Scraping page {j}.....!")
             soup_from_given_url = await url(j,count_url)
             await extract(soup_from_given_url)
         count_url = count_url + 1
+        df = await pd.DataFrame(product_list)
+        await df.to_csv(f"{title}"".csv")
+        await product_list.clear()
 
 
-results = asyncio.run(main())
-
-
-# if __name__ == "__main__":
-#     main()
+asyncio.run(main())
